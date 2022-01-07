@@ -494,10 +494,6 @@ export class WAConnection extends Base {
     /** Adds the given message to the appropriate chat, if the chat doesn't exist, it is created */
     protected async chatAddMessageAppropriate (message: WAMessage) {
         const jid = whatsappID(message.key.remoteJid)
-        if(isGroupID(jid) && !jid.includes('-')) {
-            this.logger.warn({ gid: jid }, 'recieved odd group ID')
-            return
-        }
         const chat = this.chats.get(jid) || await this.chatAdd (jid)
         this.chatAddMessage (message, chat)
     }
@@ -664,7 +660,7 @@ export class WAConnection extends Base {
     }
     protected emitGroupUpdate = (jid: string, update: Partial<WAGroupMetadata>) => {
         const chat = this.chats.get(jid)
-        if (chat.metadata) Object.assign(chat.metadata, update)
+        if (chat && chat.metadata) Object.assign(chat.metadata, update)
         this.emit ('group-update', { jid, ...update })
     }
     protected chatUpdateTime = (chat, stamp: number) => this.chats.update (chat.jid, c => c.t = stamp)
